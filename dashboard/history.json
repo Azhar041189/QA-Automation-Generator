@@ -1,0 +1,79 @@
+[
+  {
+    "type": "single",
+    "name": "smoke.spec.ts",
+    "status": "Passed",
+    "id": 11,
+    "timestamp": "2026-03-16T10:59:58.481Z"
+  },
+  {
+    "type": "single",
+    "name": "smoke.spec.ts",
+    "status": "Passed",
+    "id": 10,
+    "timestamp": "2026-03-16T10:59:57.768Z"
+  },
+  {
+    "type": "single",
+    "name": "smoke.spec.ts",
+    "status": "Passed",
+    "id": 9,
+    "timestamp": "2026-03-16T10:59:57.536Z"
+  },
+  {
+    "type": "single",
+    "name": "smoke.spec.ts",
+    "status": "Passed",
+    "id": 8,
+    "timestamp": "2026-03-16T10:56:30.040Z"
+  },
+  {
+    "type": "single",
+    "name": "smoke.spec.ts",
+    "status": "Passed",
+    "id": 7,
+    "timestamp": "2026-03-16T10:56:27.102Z"
+  },
+  {
+    "type": "single",
+    "name": "smoke.spec.ts",
+    "status": "Passed",
+    "id": 6,
+    "timestamp": "2026-03-16T10:56:27.079Z"
+  },
+  {
+    "type": "single",
+    "name": "smoke.spec.ts",
+    "status": "Passed",
+    "id": 5,
+    "timestamp": "2026-03-16T10:56:21.818Z"
+  },
+  {
+    "type": "suite",
+    "name": "Full Test Suite",
+    "status": "Passed",
+    "id": 4,
+    "timestamp": "2026-03-16T10:53:59.572Z"
+  },
+  {
+    "type": "suite",
+    "name": "Full Test Suite",
+    "status": "Failed",
+    "id": 3,
+    "timestamp": "2026-03-16T10:52:22.028Z"
+  },
+  {
+    "type": "suite",
+    "name": "Full Test Suite",
+    "status": "Failed",
+    "id": 2,
+    "timestamp": "2026-03-16T10:32:43.265Z"
+  },
+  {
+    "type": "suite",
+    "name": "Full Test Suite",
+    "status": "Failed",
+    "id": 1,
+    "timestamp": "2026-03-16T10:31:31.940Z"
+  }
+]

@@ -1,19 +1,31 @@
 {
   "name": "qa-automation-ai",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "server/index.js",
   "scripts": {
+    "start": "node server/index.js",
+    "dashboard": "node dashboard/server.js",
+    "start:all": "node server/index.js & node dashboard/server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "qa",
+    "automation",
+    "test-generator",
+    "playwright",
+    "selenium"
+  ],
+  "author": "Azhar",
   "license": "ISC",
   "dependencies": {
     "@faker-js/faker": "^10.3.0",
+    "@playwright/test": "^1.58.2",
+    "axios": "^1.6.0",
     "cors": "^2.8.6",
     "express": "^5.2.1",
     "jszip": "^3.10.1",
-    "playwright": "^1.58.2"
+    "playwright": "^1.58.2",
+    "xlsx": "^0.18.5"
   },
-  "description": ""
+  "description": "AI-powered QA Automation Generator - generates test frameworks from URLs and manual test cases"
 }

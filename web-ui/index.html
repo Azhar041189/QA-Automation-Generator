@@ -1,48 +1,397 @@
 <!DOCTYPE html>
-<html>
-
-<body>
-
-    <h2>QA Automation Generator</h2>
-
-    URL
-    <input id="url">
-
-    Steps
-    <textarea id="steps"></textarea>
-
-    <button onclick="generate()">Generate</button>
-
-    <pre id="output"></pre>
-
-    <script>
-
-        async function generate() {
-
-            const url = document.getElementById("url").value
-            const steps = document.getElementById("steps").value.split("\n")
-
-            const res = await fetch("http://localhost:3000/generate", {
-
-                method: "POST",
-
-                headers: {
-                    "Content-Type": "application/json"
-                },
-
-                body: JSON.stringify({ url, steps, tool: "playwright" })
-
-            })
-
-            const data = await res.json()
-
-            document.getElementById("output").textContent =
-                JSON.stringify(data, null, 2)
-
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QA Automation Generator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-card: #1e293b;
+            --border: #334155;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --code-bg: #0c1222;
+            --code-text: #4ade80;
+            --radius: 12px;
         }
 
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        .app-header {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border-bottom: 1px solid var(--border);
+            padding: 20px 40px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .app-header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .app-header .badge {
+            background: var(--accent);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px 40px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .panel {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+        }
+
+        .panel h2 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.8rem;
+        }
+
+        label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 10px 14px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            margin-bottom: 16px;
+            transition: border-color 0.2s;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+        }
+
+        textarea { resize: vertical; min-height: 120px; }
+
+        select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2394a3b8' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 5h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+        }
+
+        .select-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6, #6366f1);
+            color: white;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-primary:active { transform: translateY(0); }
+
+        .btn-secondary {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            padding: 8px 16px;
+            font-size: 0.8rem;
+        }
+
+        .btn-secondary:hover {
+            background: var(--border);
+        }
+
+        .output-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .output-area {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+            min-height: 300px;
+            max-height: 500px;
+            overflow: auto;
+            font-family: 'Cascadia Code', 'Fira Code', monospace;
+            font-size: 0.82rem;
+            line-height: 1.6;
+            color: var(--code-text);
+            white-space: pre-wrap;
+        }
+
+        .status-bar {
+            margin-top: 16px;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 0.82rem;
+            font-weight: 500;
+            display: none;
+        }
+
+        .status-bar.info { display: block; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); color: #60a5fa; }
+        .status-bar.success { display: block; background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); color: #4ade80; }
+        .status-bar.error { display: block; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); color: #f87171; }
+
+        .full-width { grid-column: 1 / -1; }
+
+        .loading {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid transparent;
+            border-top-color: currentColor;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        @media (max-width: 768px) {
+            .container { grid-template-columns: 1fr; padding: 16px; }
+            .app-header { padding: 16px 20px; }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-header">
+        <h1>🧪 QA Automation Generator</h1>
+        <span class="badge">v2.0</span>
+    </div>
+
+    <div class="container">
+        <div class="panel">
+            <h2>⚙️ Configuration</h2>
+
+            <label>Page URL</label>
+            <input id="url" placeholder="https://example.com/login" />
+
+            <label>Manual Test Steps</label>
+            <textarea id="steps" placeholder="Open login page&#10;Enter username&#10;Enter password&#10;Click login&#10;Verify dashboard"></textarea>
+
+            <div class="select-row">
+                <div>
+                    <label>Tool</label>
+                    <select id="tool">
+                        <option value="playwright">Playwright</option>
+                        <option value="selenium">Selenium</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Language</label>
+                    <select id="lang">
+                        <option value="TypeScript">TypeScript</option>
+                        <option value="JavaScript">JavaScript</option>
+                        <option value="Java">Java</option>
+                        <option value="Python">Python</option>
+                    </select>
+                </div>
+            </div>
+
+            <button class="btn btn-primary" id="generateBtn" onclick="generate()">
+                Generate Framework
+            </button>
+
+            <div id="status" class="status-bar"></div>
+        </div>
+
+        <div class="panel">
+            <div class="output-header">
+                <h2>📄 Generated Output</h2>
+                <button class="btn btn-secondary" onclick="copyOutput()">📋 Copy</button>
+            </div>
+            <div id="output" class="output-area">Paste a URL and test steps, then click Generate...</div>
+        </div>
+
+        <div class="panel full-width">
+            <h2>🔍 Quick Actions</h2>
+            <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                <button class="btn btn-secondary" onclick="scanDOM()">🌐 Scan DOM</button>
+                <button class="btn btn-secondary" onclick="generateTestData()">📊 Generate Test Data</button>
+                <button class="btn btn-secondary" onclick="generateApiTest()">🔌 Generate API Test</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = "http://localhost:3000";
+
+        function showStatus(msg, type) {
+            const el = document.getElementById("status");
+            el.textContent = msg;
+            el.className = "status-bar " + type;
+        }
+
+        async function generate() {
+            const url = document.getElementById("url").value;
+            const steps = document.getElementById("steps").value.split("\n").filter(s => s.trim());
+            const tool = document.getElementById("tool").value;
+
+            if (!url || steps.length === 0) {
+                showStatus("Please enter a URL and test steps.", "error");
+                return;
+            }
+
+            const btn = document.getElementById("generateBtn");
+            btn.innerHTML = '<span class="loading"></span> Generating...';
+            btn.disabled = true;
+            showStatus("Connecting to server and generating framework...", "info");
+
+            try {
+                const res = await fetch(`${API_BASE}/generate`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ url, steps, tool })
+                });
+
+                const data = await res.json();
+
+                if (data.error) {
+                    showStatus("Error: " + data.error, "error");
+                    document.getElementById("output").textContent = "Error: " + data.error;
+                } else {
+                    showStatus("Framework generated successfully!", "success");
+                    document.getElementById("output").textContent = JSON.stringify(data, null, 2);
+                }
+            } catch (error) {
+                showStatus("Server not running. Start with: npm start", "error");
+                document.getElementById("output").textContent =
+                    "Could not connect to server.\n\nMake sure the server is running:\n\n  cd qa-automation-ai\n  npm start\n\nThen try again.";
+            }
+
+            btn.innerHTML = "Generate Framework";
+            btn.disabled = false;
+        }
+
+        async function scanDOM() {
+            const url = document.getElementById("url").value;
+            if (!url) { showStatus("Enter a URL first", "error"); return; }
+            showStatus("Scanning DOM...", "info");
+
+            try {
+                const res = await fetch(`${API_BASE}/scan`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ url })
+                });
+                const data = await res.json();
+                showStatus(`Found ${data.elements.length} elements`, "success");
+                document.getElementById("output").textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                showStatus("Server not running. Start with: npm start", "error");
+            }
+        }
+
+        async function generateTestData() {
+            showStatus("Generating test data...", "info");
+            try {
+                const res = await fetch(`${API_BASE}/generate-test-data`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ type: "user", count: 5 })
+                });
+                const data = await res.json();
+                showStatus("Test data generated!", "success");
+                document.getElementById("output").textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                showStatus("Server not running. Start with: npm start", "error");
+            }
+        }
+
+        async function generateApiTest() {
+            const url = document.getElementById("url").value || "https://api.example.com";
+            showStatus("Generating API test...", "info");
+            try {
+                const res = await fetch(`${API_BASE}/generate-api-test`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ endpoint: url })
+                });
+                const data = await res.json();
+                showStatus("API test generated!", "success");
+                document.getElementById("output").textContent = data.code;
+            } catch (error) {
+                showStatus("Server not running. Start with: npm start", "error");
+            }
+        }
+
+        function copyOutput() {
+            const text = document.getElementById("output").textContent;
+            navigator.clipboard.writeText(text);
+            showStatus("Copied to clipboard!", "success");
+            setTimeout(() => { document.getElementById("status").className = "status-bar"; }, 2000);
+        }
     </script>
-
 </body>
-
 </html>

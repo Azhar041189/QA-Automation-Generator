@@ -11,7 +11,8 @@ function generateSeleniumTestNGFramework(projectName = "selenium-testng-framewor
         `${basePath}/src/test/java/base`,
         `${basePath}/src/test/java/utils`,
         `${basePath}/testdata`,
-        `${basePath}/config`
+        `${basePath}/config`,
+        `${basePath}/reports`
     ];
 
     directories.forEach(dir => {
@@ -21,7 +22,8 @@ function generateSeleniumTestNGFramework(projectName = "selenium-testng-framewor
     });
 
     // Generate pom.xml
-    const pomXml = `<project>
+    const pomXml = `<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.qa.framework</groupId>
     <artifactId>${projectName}</artifactId>
@@ -32,36 +34,36 @@ function generateSeleniumTestNGFramework(projectName = "selenium-testng-framewor
         <maven.compiler.target>11</maven.compiler.target>
     </properties>
     <dependencies>
+        <!-- Selenium -->
         <dependency>
             <groupId>org.seleniumhq.selenium</groupId>
             <artifactId>selenium-java</artifactId>
             <version>4.18.1</version>
         </dependency>
+        <!-- TestNG -->
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
             <version>7.9.0</version>
             <scope>test</scope>
         </dependency>
+        <!-- Apache POI for Excel -->
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-ooxml</artifactId>
             <version>5.2.3</version>
         </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>2.15.2</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-            <version>3.14.0</version>
-        </dependency>
+        <!-- Extent Reports -->
         <dependency>
             <groupId>com.aventstack</groupId>
             <artifactId>extentreports</artifactId>
             <version>5.0.9</version>
+        </dependency>
+        <!-- Log4j -->
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <version>2.20.0</version>
         </dependency>
     </dependencies>
     <build>
@@ -76,55 +78,119 @@ function generateSeleniumTestNGFramework(projectName = "selenium-testng-framewor
                     </suiteXmlFiles>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.11.0</version>
-                <configuration>
-                    <source>11</source>
-                    <target>11</target>
-                </configuration>
-            </plugin>
         </plugins>
     </build>
 </project>`;
 
     fs.writeFileSync(`${basePath}/pom.xml`, pomXml);
 
-    // Generate BaseTest.java
+    // Generate BaseTest.java with ExtentReports integration
     const baseTest = `package base;
 
+import com.aventstack.extentreports.ExtentReports;
+import com.aventstack.extentreports.ExtentTest;
+import com.aventstack.extentreports.Status;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.firefox.FirefoxDriver;
-import org.openqa.selenium.edge.EdgeDriver;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Parameters;
-
+import org.testng.ITestResult;
+import org.testng.annotations.*;
 import utils.DriverManager;
+import utils.ExtentManager;
 
 public class BaseTest {
 
     protected WebDriver driver;
+    protected static ExtentReports extent;
+    protected ExtentTest test;
+
+    @BeforeSuite
+    public void setupSuite() {
+        extent = ExtentManager.getReport();
+    }
 
     @BeforeMethod
-    @Parameters({"browser"})
-    public void setup(String browser) {
-        driver = DriverManager.getDriver(browser);
+    @Parameters({"browser", "headless"})
+    public void setup(@Optional("chrome") String browser, @Optional("false") String headless) {
+        test = extent.createTest(getClass().getSimpleName());
+        driver = DriverManager.getDriver(browser, Boolean.parseBoolean(headless));
+        test.log(Status.INFO, "Starting test on " + browser + (Boolean.parseBoolean(headless) ? " (Headless)" : ""));
     }
 
     @AfterMethod
-    public void teardown() {
+    public void teardown(ITestResult result) {
+        if (result.getStatus() == ITestResult.FAILURE) {
+            test.log(Status.FAIL, "Test Failed: " + result.getThrowable());
+        } else if (result.getStatus() == ITestResult.SKIP) {
+            test.log(Status.SKIP, "Test Skipped: " + result.getThrowable());
+        } else {
+            test.log(Status.PASS, "Test Passed");
+        }
+
         if (driver != null) {
             driver.quit();
         }
+    }
+
+    @AfterSuite
+    public void tearDownSuite() {
+        extent.flush();
     }
 }`;
 
     fs.writeFileSync(`${basePath}/src/test/java/base/BaseTest.java`, baseTest);
 
-    // Generate DriverManager.java
+    // Generate ExcelReader.java
+    const excelReader = `package utils;
+
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import java.io.FileInputStream;
+import java.io.IOException;
+
+public class ExcelReader {
+
+    private static final String FILE_PATH = "testdata/loginData.xlsx";
+
+    public static String getCellData(int row, int col) throws Exception {
+        try (FileInputStream file = new FileInputStream(FILE_PATH);
+             XSSFWorkbook workbook = new XSSFWorkbook(file)) {
+            XSSFSheet sheet = workbook.getSheet("Sheet1");
+            return sheet.getRow(row).getCell(col).getStringCellValue();
+        } catch (IOException e) {
+            throw new Exception("Could not read Excel file: " + e.getMessage());
+        }
+    }
+}`;
+
+    fs.writeFileSync(`${basePath}/src/test/java/utils/ExcelReader.java`, excelReader);
+
+    // Generate ExtentManager.java
+    const extentManager = `package utils;
+
+import com.aventstack.extentreports.ExtentReports;
+import com.aventstack.extentreports.reporter.ExtentSparkReporter;
+
+public class ExtentManager {
+
+    private static ExtentReports extent;
+
+    public static ExtentReports getReport() {
+        if (extent == null) {
+            ExtentSparkReporter reporter = new ExtentSparkReporter("reports/report.html");
+            reporter.config().setReportName("QA Automation Results");
+            reporter.config().setDocumentTitle("Enterprise Test Report");
+            
+            extent = new ExtentReports();
+            extent.attachReporter(reporter);
+            extent.setSystemInfo("Tester", "QA Engineer");
+            extent.setSystemInfo("Environment", "QA");
+        }
+        return extent;
+    }
+}`;
+
+    fs.writeFileSync(`${basePath}/src/test/java/utils/ExtentManager.java`, extentManager);
+
+    // Generate DriverManager.java with Headless support
     const driverManager = `package utils;
 
 import org.openqa.selenium.WebDriver;
@@ -137,34 +203,33 @@ import org.openqa.selenium.edge.EdgeOptions;
 
 public class DriverManager {
 
-    public static WebDriver getDriver(String browser) {
+    public static WebDriver getDriver(String browser, boolean headless) {
         switch (browser.toLowerCase()) {
             case "chrome":
-            case "ch":
                 ChromeOptions chromeOptions = new ChromeOptions();
+                if (headless) {
+                    chromeOptions.addArguments("--headless=new");
+                    chromeOptions.addArguments("--window-size=1920,1080");
+                }
                 chromeOptions.addArguments("--start-maximized");
-                // Uncomment for headless: chromeOptions.addArguments("--headless=new");
                 return new ChromeDriver(chromeOptions);
                 
             case "firefox":
-            case "ff":
                 FirefoxOptions firefoxOptions = new FirefoxOptions();
-                firefoxOptions.addArguments("--start-maximized");
-                // Uncomment for headless: firefoxOptions.addArguments("--headless");
+                if (headless) {
+                    firefoxOptions.addArguments("--headless");
+                }
                 return new FirefoxDriver(firefoxOptions);
                 
             case "edge":
-            case "ed":
                 EdgeOptions edgeOptions = new EdgeOptions();
-                edgeOptions.addArguments("--start-maximized");
-                // Uncomment for headless: edgeOptions.addArguments("--headless=new");
+                if (headless) {
+                    edgeOptions.addArguments("--headless=new");
+                }
                 return new EdgeDriver(edgeOptions);
                 
             default:
-                // Default to Chrome
-                ChromeOptions defaultOptions = new ChromeOptions();
-                defaultOptions.addArguments("--start-maximized");
-                return new ChromeDriver(defaultOptions);
+                return new ChromeDriver();
         }
     }
 }`;
@@ -237,52 +302,40 @@ public class LoginPage {
 
     fs.writeFileSync(`${basePath}/src/test/java/pages/LoginPage.java`, loginPage);
 
-    // Generate Sample Test
+    // Generate LoginTest.java showing Data-Driven usage
     const loginTest = `package tests;
 
 import base.BaseTest;
-import org.testng.Assert;
 import org.testng.annotations.Test;
 import pages.LoginPage;
+import utils.ExcelReader;
 
 public class LoginTest extends BaseTest {
 
     @Test
-    public void testValidLogin() {
+    public void testLoginWithExcelData() throws Exception {
         LoginPage loginPage = new LoginPage(driver);
         
-        // Navigate to login page
+        // Reading data from Excel
+        String username = ExcelReader.getCellData(1, 0); // Row 1, Col 0
+        String password = ExcelReader.getCellData(1, 1); // Row 1, Col 1
+        
+        test.info("Attempting login with user: " + username);
+        
         driver.get("https://example.com/login");
+        loginPage.login(username, password);
         
-        // Perform login
-        loginPage.login("validuser", "validpass");
-        
-        // Verify successful login (example assertion)
-        Assert.assertTrue(loginPage.getPageTitle().contains("Dashboard"),
-                "Login failed - Dashboard page not displayed");
-    }
-
-    @Test
-    public void testInvalidLogin() {
-        LoginPage loginPage = new LoginPage(driver);
-        
-        // Navigate to login page
-        driver.get("https://example.com/login");
-        
-        // Perform login with invalid credentials
-        loginPage.login("invaliduser", "wrongpass");
-        
-        // Verify error message is displayed
-        Assert.assertTrue(loginPage.isErrorMessageDisplayed(),
-                "Error message should be displayed for invalid credentials");
+        test.pass("Login sequence completed for " + username);
     }
 }`;
 
     fs.writeFileSync(`${basePath}/src/test/java/tests/LoginTest.java`, loginTest);
 
-    // Generate testng.xml
+    // Generate testng.xml with parameters
     const testngXml = `<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd" >
-<suite name="Login Test Suite" parallel="methods" thread-count="2">
+<suite name="Enterprise Suite" parallel="tests" thread-count="2">
+    <parameter name="browser" value="chrome"/>
+    <parameter name="headless" value="false"/>
     <test name="Login Tests">
         <classes>
             <class name="tests.LoginTest"/>
@@ -292,34 +345,11 @@ public class LoginTest extends BaseTest {
 
     fs.writeFileSync(`${basePath}/testng.xml`, testngXml);
 
-    // Generate sample test data (JSON)
-    const testData = `{
-  "validCredentials": {
-    "username": "validuser",
-    "password": "validpass"
-  },
-  "invalidCredentials": {
-    "username": "invaliduser",
-    "password": "wrongpass"
-  },
-  "lockedAccount": {
-    "username": "lockeduser",
-    "password": "lockedpass"
-  }
-}`;
+    // Generate sample test data (JSON) - REMOVED as per instruction, replaced by Excel
+    // fs.writeFileSync(`${basePath}/testdata/loginData.json`, testData);
 
-    fs.writeFileSync(`${basePath}/testdata/loginData.json`, testData);
-
-    // Generate config.properties
-    const configProps = `# Environment Configuration
-environment=test
-base.url=https://example.com
-browser=chrome
-timeout=30
-screenshot.on.failure=true
-`;
-
-    fs.writeFileSync(`${basePath}/config/config.properties`, configProps);
+    // Generate config.properties - REMOVED as per instruction, parameters in testng.xml
+    // fs.writeFileSync(`${basePath}/config/config.properties`, configProps);
 
     // Generate README.md
     const readme = `# ${projectName}
@@ -339,11 +369,15 @@ ${projectName}
 │           ├── tests
 │           │   └── LoginTest.java
 │           └── utils
-│               └── DriverManager.java
+│               ├── DriverManager.java
+│               ├── ExcelReader.java
+│               └── ExtentManager.java
 ├── testdata
-│   └── loginData.json
+│   └── loginData.xlsx (Example Excel file for data-driven tests)
 ├── config
-│   └── config.properties
+│   └── (empty or custom config files)
+├── reports
+│   └── report.html (ExtentReports output)
 ├── testng.xml
 └── pom.xml
 \`\`\`
@@ -354,37 +388,35 @@ ${projectName}
 - Chrome/Firefox/Edge browser (for test execution)
 
 ## Setup
-1. Clone the repository
-2. Update config.properties with your environment settings
-3. Update testdata/loginData.json with your test credentials
-4. Update the LoginTest.java with your actual test scenarios
+1. Clone the repository.
+2. Place your Excel test data file (e.g., \`loginData.xlsx\`) in the \`testdata\` folder.
+   - Ensure the Excel file has a sheet named "Sheet1" and data structured as expected by \`ExcelReader.java\`.
+3. Update the \`LoginTest.java\` with your actual test scenarios and Excel data access.
+4. Modify \`testng.xml\` parameters for browser and headless mode as needed.
 
 ## Running Tests
-To run tests locally:
+To run tests locally using Maven:
 \`\`\`
-mvn test
-\`\`\`
-
-To run tests with specific browser:
-\`\`\`
-mvn test -Dbrowser=chrome
+mvn clean test
 \`\`\`
 
-To run tests in headless mode (modify DriverManager.java):
+To run tests with specific browser and headless mode via Maven command line:
 \`\`\`
-mvn test
+mvn clean test -Dbrowser=firefox -Dheadless=true
 \`\`\`
+(Note: Parameters in \`testng.xml\` will be overridden by command line parameters if provided.)
 
 ## Reports
-TestNG generates default reports in:
-- target/surefire-reports/
+ExtentReports are generated in:
+- \`reports/report.html\`
 
-For enhanced reporting, ExtentReports is integrated (customize as needed).
+TestNG also generates default reports in:
+- \`target/surefire-reports/\`
 `;
 
     fs.writeFileSync(`${basePath}/README.md`, readme);
 
-    console.log(`Selenium TestNG framework generated successfully at: ${basePath}`);
+    console.log(`Enterprise Selenium framework generated at: ${basePath}`);
     return basePath;
 }
 

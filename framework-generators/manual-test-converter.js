@@ -157,4 +157,8 @@ function convertExcelToAutomation(excelFilePath, tool, language) {
     }
 }
 
-module.exports = { convertExcelToAutomation };
+module.exports = { 
+    convertExcelToAutomation,
+    convertManualStepsToPlaywright,
+    convertManualStepsToSelenium
+};

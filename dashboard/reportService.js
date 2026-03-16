@@ -3,27 +3,24 @@ const path = require("path")
 
 function openReport() {
     return new Promise((resolve, reject) => {
-        // Try to open Allure report
-        exec("npx allure serve allure-results", { cwd: path.join(__dirname, '..') }, (err, stdout, stderr) => {
+        // Favor Playwright's native HTML report viewer
+        console.log("Attempting to open Playwright HTML report...");
+        exec("npx playwright show-report", { cwd: path.join(__dirname, '..') }, (err, stdout, stderr) => {
             if (err) {
-                // If Allure is not available, try to generate a basic report
-                exec("npm run test:report", { cwd: path.join(__dirname, '..') }, (err2, stdout2, stderr2) => {
+                // Try Allure as fallback
+                exec("npx allure serve allure-results", { cwd: path.join(__dirname, '..') }, (err2, stdout2, stderr2) => {
                     if (err2) {
-                        reject(new Error(`Could not open report: ${stderr2}`));
-                    } else {
                         resolve({
-                            success: true,
-                            message: "Basic report generated",
-                            output: stdout2
+                            success: false,
+                            message: "Report viewer failed to start.",
+                            error: "No report found. Run tests first."
                         });
+                    } else {
+                        resolve({ success: true, message: "Allure report opened" });
                     }
                 });
             } else {
-                resolve({
-                    success: true,
-                    message: "Allure report opened",
-                    output: stdout
-                });
+                resolve({ success: true, message: "Playwright HTML report opened" });
             }
         });
     });
