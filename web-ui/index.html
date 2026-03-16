@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+
+<body>
+
+    <h2>QA Automation Generator</h2>
+
+    URL
+    <input id="url">
+
+    Steps
+    <textarea id="steps"></textarea>
+
+    <button onclick="generate()">Generate</button>
+
+    <pre id="output"></pre>
+
+    <script>
+
+        async function generate() {
+
+            const url = document.getElementById("url").value
+            const steps = document.getElementById("steps").value.split("\n")
+
+            const res = await fetch("http://localhost:3000/generate", {
+
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify({ url, steps, tool: "playwright" })
+
+            })
+
+            const data = await res.json()
+
+            document.getElementById("output").textContent =
+                JSON.stringify(data, null, 2)
+
+        }
+
+    </script>
+
+</body>
+
+</html>

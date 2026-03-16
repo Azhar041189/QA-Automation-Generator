@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <title>QA Automation Generator</title>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+    <style>
+        body {
+            font-family: Arial;
+            background: #f2f2f2;
+            padding: 40px;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            max-width: 900px;
+            margin: auto;
+            border-radius: 10px;
+        }
+
+        input,
+        textarea,
+        select {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            margin-bottom: 20px;
+        }
+
+        button {
+            padding: 12px 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        pre {
+            background: #111;
+            color: #0f0;
+            padding: 20px;
+            overflow: auto;
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h2>QA Automation Project Generator</h2>
+
+        <label>Page URL</label>
+        <input id="url" />
+
+        <label>Test Steps</label>
+        <textarea id="steps" rows="5"></textarea>
+
+        <label>Automation Tool</label>
+        <select id="tool">
+            <option>Selenium</option>
+            <option>Playwright</option>
+        </select>
+
+        <label>Language</label>
+        <select id="lang">
+            <option>Java</option>
+            <option>Python</option>
+            <option>JavaScript</option>
+            <option>TypeScript</option>
+        </select>
+
+        <button onclick="generate()">Generate Project</button>
+
+        <button onclick="downloadZip()">Download ZIP</button>
+
+        <h3>Preview</h3>
+        <pre id="output"></pre>
+
+    </div>
+
+    <script>
+
+        let zip = new JSZip()
+
+        function generate() {
+
+            let url = document.getElementById("url").value
+            let steps = document.getElementById("steps").value
+            let tool = document.getElementById("tool").value
+            let lang = document.getElementById("lang").value
+
+            zip = new JSZip()
+
+            let preview = ""
+
+            if (tool === "Selenium" && lang === "Java") {
+
+                let testCode = `package tests;
+
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.testng.annotations.Test;
+
+public class SampleTest {
+
+@Test
+public void testCase(){
+
+WebDriver driver=new ChromeDriver();
+
+driver.get("${url}");
+
+System.out.println("${steps}");
+
+driver.quit();
+
+}
+
+}
+`
+
+                let pom = `<project>
+
+<dependencies>
+
+<dependency>
+<groupId>org.seleniumhq.selenium</groupId>
+<artifactId>selenium-java</artifactId>
+<version>4.18.1</version>
+</dependency>
+
+<dependency>
+<groupId>org.testng</groupId>
+<artifactId>testng</artifactId>
+<version>7.9.0</version>
+</dependency>
+
+</dependencies>
+
+</project>`
+
+                zip.folder("src/test/java/tests").file("SampleTest.java", testCode)
+                zip.file("pom.xml", pom)
+
+                preview = testCode
+
+            }
+
+            if (tool === "Playwright" && lang === "JavaScript") {
+
+                let testCode = `const { test, expect } = require('@playwright/test');
+
+test('Sample Test', async ({ page }) => {
+
+await page.goto("${url}");
+
+console.log("${steps}");
+
+});
+`
+
+                let packagejson = `{
+"name":"playwright-framework",
+"devDependencies":{
+"@playwright/test":"latest"
+}
+}`
+
+                zip.folder("tests").file("sample.spec.js", testCode)
+                zip.file("package.json", packagejson)
+
+                preview = testCode
+
+            }
+
+            if (tool === "Playwright" && lang === "TypeScript") {
+
+                let testCode = `import { test, expect } from '@playwright/test';
+
+test('Sample Test', async ({ page }) => {
+
+await page.goto('${url}')
+
+console.log("${steps}")
+
+})
+`
+
+                let config = `import { defineConfig } from '@playwright/test'
+
+export default defineConfig({
+testDir: './tests'
+})
+`
+
+                zip.folder("tests").file("sample.spec.ts", testCode)
+                zip.file("playwright.config.ts", config)
+
+                preview = testCode
+
+            }
+
+            if (tool === "Selenium" && lang === "Python") {
+
+                let testCode = `from selenium import webdriver
+
+driver = webdriver.Chrome()
+
+driver.get("${url}")
+
+print("${steps}")
+
+driver.quit()
+`
+
+                let req = `selenium
+pytest`
+
+                zip.folder("tests").file("test_sample.py", testCode)
+                zip.file("requirements.txt", req)
+
+                preview = testCode
+
+            }
+
+            document.getElementById("output").textContent = preview
+
+        }
+
+        function downloadZip() {
+
+            zip.generateAsync({ type: "blob" }).then(function (content) {
+
+                let a = document.createElement("a")
+                a.href = URL.createObjectURL(content)
+                a.download = "automation-framework.zip"
+                a.click()
+
+            })
+
+        }
+
+    </script>
+
+</body>
+
+</html>

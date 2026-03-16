@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <title>Super QA Automation Generator</title>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+    <style>
+        body {
+            font-family: Arial;
+            background: #eef2f7;
+            padding: 40px;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            max-width: 1000px;
+            margin: auto;
+            border-radius: 10px;
+        }
+
+        textarea,
+        input,
+        select {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            margin-bottom: 20px;
+        }
+
+        button {
+            padding: 12px 18px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        pre {
+            background: #111;
+            color: #00ff88;
+            padding: 20px;
+            overflow: auto;
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h2>Super QA Automation Project Generator</h2>
+
+        <label>Page URL</label>
+        <input id="url" />
+
+        <label>Manual Test Case</label>
+        <textarea id="steps" rows="6"></textarea>
+
+        <label>Tool</label>
+        <select id="tool">
+            <option>Selenium</option>
+            <option>Playwright</option>
+        </select>
+
+        <label>Language</label>
+        <select id="lang">
+            <option>Java</option>
+            <option>Python</option>
+            <option>JavaScript</option>
+            <option>TypeScript</option>
+        </select>
+
+        <button onclick="generate()">Generate Framework</button>
+        <button onclick="downloadZip()">Download Project</button>
+
+        <h3>Preview</h3>
+        <pre id="output"></pre>
+
+    </div>
+
+    <script>
+
+        let zip = new JSZip()
+
+        function generate() {
+
+            let url = document.getElementById("url").value
+            let steps = document.getElementById("steps").value
+            let tool = document.getElementById("tool").value
+            let lang = document.getElementById("lang").value
+
+            zip = new JSZip()
+
+            let preview = ""
+
+            if (tool === "Selenium" && lang === "Java") {
+
+                let test = `package tests;
+
+import org.testng.annotations.Test;
+import pages.LoginPage;
+import base.BaseTest;
+
+public class LoginTest extends BaseTest{
+
+@Test
+public void loginTest(){
+
+driver.get("${url}");
+
+LoginPage page = new LoginPage(driver);
+
+System.out.println("${steps}");
+
+}
+
+}`
+
+                let base = `package base;
+
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+
+public class BaseTest {
+
+public WebDriver driver;
+
+@BeforeMethod
+public void setup(){
+
+driver = new ChromeDriver();
+
+}
+
+@AfterMethod
+public void teardown(){
+
+driver.quit();
+
+}
+
+}`
+
+                let page = `package pages;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+
+public class LoginPage{
+
+WebDriver driver;
+
+public LoginPage(WebDriver driver){
+this.driver=driver;
+}
+
+By username = By.id("username");
+By password = By.id("password");
+By loginBtn = By.id("login");
+
+}`
+
+                let util = `package utils;
+
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.TakesScreenshot;
+import org.openqa.selenium.WebDriver;
+
+public class ScreenshotUtil{
+
+public static void capture(WebDriver driver){
+
+((TakesScreenshot)driver).getScreenshotAs(OutputType.FILE);
+
+}
+
+}`
+
+                let pom = `<project>
+
+<dependencies>
+
+<dependency>
+<groupId>org.seleniumhq.selenium</groupId>
+<artifactId>selenium-java</artifactId>
+<version>4.18.1</version>
+</dependency>
+
+<dependency>
+<groupId>org.testng</groupId>
+<artifactId>testng</artifactId>
+<version>7.9.0</version>
+</dependency>
+
+</dependencies>
+
+</project>`
+
+                zip.folder("src/test/java/tests").file("LoginTest.java", test)
+                zip.folder("src/test/java/base").file("BaseTest.java", base)
+                zip.folder("src/test/java/pages").file("LoginPage.java", page)
+                zip.folder("src/test/java/utils").file("ScreenshotUtil.java", util)
+                zip.file("pom.xml", pom)
+
+                preview = test
+
+            }
+
+            if (tool === "Playwright" && lang === "TypeScript") {
+
+                let test = `import { test, expect } from '@playwright/test';
+import { LoginPage } from '../pages/LoginPage';
+
+test('Login Test', async ({ page }) => {
+
+await page.goto('${url}')
+
+const login = new LoginPage(page)
+
+console.log("${steps}")
+
+})
+`
+
+                let page = `import { Page } from '@playwright/test'
+
+export class LoginPage{
+
+constructor(private page: Page){}
+
+username = '#username'
+password = '#password'
+loginBtn = '#login'
+
+}
+`
+
+                let config = `import { defineConfig } from '@playwright/test'
+
+export default defineConfig({
+testDir: './tests'
+})
+`
+
+                let packagejson = `{
+"name":"playwright-framework",
+"devDependencies":{
+"@playwright/test":"latest"
+}
+}`
+
+                zip.folder("tests").file("login.spec.ts", test)
+                zip.folder("pages").file("LoginPage.ts", page)
+                zip.file("playwright.config.ts", config)
+                zip.file("package.json", packagejson)
+
+                preview = test
+
+            }
+
+            if (tool === "Selenium" && lang === "Python") {
+
+                let test = `from selenium import webdriver
+from pages.login_page import LoginPage
+
+driver = webdriver.Chrome()
+
+driver.get("${url}")
+
+print("${steps}")
+
+driver.quit()
+`
+
+                let page = `class LoginPage:
+
+username = "username"
+password = "password"
+login_btn = "login"
+`
+
+                let req = `selenium
+pytest`
+
+                zip.folder("tests").file("test_login.py", test)
+                zip.folder("pages").file("login_page.py", page)
+                zip.file("requirements.txt", req)
+
+                preview = test
+
+            }
+
+            if (tool === "Playwright" && lang === "JavaScript") {
+
+                let test = `const { test, expect } = require('@playwright/test')
+
+test('Login Test', async ({ page }) => {
+
+await page.goto("${url}")
+
+console.log("${steps}")
+
+})
+`
+
+                let packagejson = `{
+"name":"playwright-framework",
+"devDependencies":{
+"@playwright/test":"latest"
+}
+}`
+
+                zip.folder("tests").file("login.spec.js", test)
+                zip.file("package.json", packagejson)
+
+                preview = test
+
+            }
+
+            document.getElementById("output").textContent = preview
+
+        }
+
+        function downloadZip() {
+
+            zip.generateAsync({ type: "blob" }).then(function (content) {
+
+                let a = document.createElement("a")
+                a.href = URL.createObjectURL(content)
+                a.download = "qa-automation-framework.zip"
+                a.click()
+
+            })
+
+        }
+
+    </script>
+
+</body>
+
+</html>

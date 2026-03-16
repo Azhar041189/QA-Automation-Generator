@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>QA Automation Control Panel</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            margin: 0;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .card h2 {
+            margin-top: 0;
+            color: #2c3e50;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 10px;
+        }
+
+        .btn {
+            display: inline-block;
+            background: #3498db;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 14px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            transition: background 0.3s;
+        }
+
+        .btn:hover {
+            background: #2980b9;
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+
+        .btn-success {
+            background: #27ae60;
+        }
+
+        .btn-success:hover {
+            background: #219a52;
+        }
+
+        .output {
+            background: #ecf0f1;
+            padding: 15px;
+            border-radius: 4px;
+            height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 13px;
+            border: 1px solid #bdc3c7;
+        }
+
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+
+        .status.success {
+            background: #d5f4e6;
+            color: #27ae60;
+            border: 1px solid #27ae60;
+        }
+
+        .status.error {
+            background: #fadbd8;
+            color: #e74c3c;
+            border: 1px solid #e74c3c;
+        }
+
+        .status.info {
+            background: #d6eaf8;
+            color: #2980b9;
+            border: 1px solid #2980b9;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>QA Automation Control Panel</h1>
+            <p>Central hub for test generation, execution, and reporting</p>
+        </header>
+
+        <div class="dashboard-grid">
+            <div class="card">
+                <h2>Test Generation</h2>
+                <button class="btn" id="generate-tests">Generate Tests from URL</button>
+                <button class="btn" id="crawl-website">Crawl Website for Tests</button>
+                <button class="btn" id="manual-to-auto">Convert Manual Tests</button>
+                <div id="generation-status" class="status"></div>
+            </div>
+
+            <div class="card">
+                <h2>Test Execution</h2>
+                <button class="btn btn-success" id="run-tests">Run All Tests</button>
+                <button class="btn" id="run-specific">Run Specific Tests</button>
+                <div id="execution-status" class="status"></div>
+            </div>
+
+            <div class="card">
+                <h2>Reporting</h2>
+                <button class="btn" id="open-report">Open Test Report</button>
+                <button class="btn" id="clear-reports">Clear Reports</button>
+                <div id="report-status" class="status"></div>
+            </div>
+
+            <div class="card">
+                <h2>CI/CD Integration</h2>
+                <button class="btn" id="trigger-ci">Trigger CI Pipeline</button>
+                <button class="btn" id="view-pipelines">View Pipeline Status</button>
+                <div id="cicd-status" class="status"></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>System Output</h2>
+            <div id="system-output" class="output"></div>
+        </div>
+    </div>
+
+    <script>
+        const apiBase = 'http://localhost:4000';
+
+        function logOutput(message) {
+            const outputDiv = document.getElementById('system-output');
+            outputDiv.innerHTML += `<div>${new Date().toLocaleTimeString()} - ${message}</div>`;
+            outputDiv.scrollTop = outputDiv.scrollHeight;
+        }
+
+        function showStatus(elementId, message, type = 'info') {
+            const statusDiv = document.getElementById(elementId);
+            statusDiv.textContent = message;
+            statusDiv.className = `status ${type}`;
+        }
+
+        document.getElementById('generate-tests').addEventListener('click', async () => {
+            showStatus('generation-status', 'Generating tests...', 'info');
+            logOutput('Starting test generation...');
+
+            try {
+                const response = await fetch(`${apiBase}/generate-from-manual`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        testCases: [
+                            "Open login page",
+                            "Enter username",
+                            "Enter password",
+                            "Click login button",
+                            "Verify dashboard is displayed"
+                        ],
+                        tool: 'playwright',
+                        language: 'typescript'
+                    })
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    showStatus('generation-status', 'Tests generated successfully!', 'success');
+                    logOutput('Tests generated successfully');
+                    logOutput(JSON.stringify(result.data, null, 2));
+                } else {
+                    showStatus('generation-status', 'Generation failed: ' + result.error, 'error');
+                    logOutput('Generation failed: ' + result.error);
+                }
+            } catch (error) {
+                showStatus('generation-status', 'Error: ' + error.message, 'error');
+                logOutput('Error: ' + error.message);
+            }
+        });
+
+        document.getElementById('crawl-website').addEventListener('click', async () => {
+            showStatus('generation-status', 'Crawling website...', 'info');
+            logOutput('Starting website crawl...');
+
+            try {
+                const response = await fetch(`${apiBase}/crawl-website`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        url: 'https://example.com',
+                        maxPages: 5
+                    })
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    showStatus('generation-status', 'Website crawled successfully!', 'success');
+                    logOutput('Website crawl completed');
+                    logOutput(`Found ${result.data.pages.length} pages`);
+                } else {
+                    showStatus('generation-status', 'Crawl failed: ' + result.error, 'error');
+                    logOutput('Crawl failed: ' + result.error);
+                }
+            } catch (error) {
+                showStatus('generation-status', 'Error: ' + error.message, 'error');
+                logOutput('Error: ' + error.message);
+            }
+        });
+
+        document.getElementById('run-tests').addEventListener('click', async () => {
+            showStatus('execution-status', 'Running tests...', 'info');
+            logOutput('Starting test execution...');
+
+            try {
+                const response = await fetch(`${apiBase}/run-tests`, {
+                    method: 'POST'
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    showStatus('execution-status', 'Tests completed!', 'success');
+                    logOutput('Test execution finished');
+                    logOutput(result.data.output);
+                } else {
+                    showStatus('execution-status', 'Tests failed: ' + result.error, 'error');
+                    logOutput('Test execution failed: ' + result.error);
+                }
+            } catch (error) {
+                showStatus('execution-status', 'Error: ' + error.message, 'error');
+                logOutput('Error: ' + error.message);
+            }
+        });
+
+        document.getElementById('open-report').addEventListener('click', async () => {
+            showStatus('report-status', 'Opening report...', 'info');
+            logOutput('Opening test report...');
+
+            try {
+                const response = await fetch(`${apiBase}/open-report`, {
+                    method: 'POST'
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    showStatus('report-status', 'Report opened!', 'success');
+                    logOutput('Report opened successfully');
+                } else {
+                    showStatus('report-status', 'Failed to open report: ' + result.error, 'error');
+                    logOutput('Failed to open report: ' + result.error);
+                }
+            } catch (error) {
+                showStatus('report-status', 'Error: ' + error.message, 'error');
+                logOutput('Error: ' + error.message);
+            }
+        });
+    </script>
+</body>
+
+</html>

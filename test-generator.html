@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>QA Test Generator</title>
+
+    <style>
+        body {
+            font-family: Arial;
+            background: #f4f4f4;
+            padding: 40px;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            max-width: 900px;
+            margin: auto;
+        }
+
+        textarea,
+        input,
+        select {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+        }
+
+        button {
+            padding: 12px 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        pre {
+            background: #111;
+            color: #0f0;
+            padding: 20px;
+            overflow: auto;
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h2>Automation Script Generator</h2>
+
+        <label>Page URL</label>
+        <input id="url" />
+
+        <label>Test Case Steps</label>
+        <textarea id="steps" rows="5"></textarea>
+
+        <label>Tool</label>
+        <select id="tool">
+            <option>Selenium</option>
+            <option>Playwright</option>
+        </select>
+
+        <label>Language</label>
+        <select id="lang">
+            <option>Java</option>
+            <option>Python</option>
+            <option>JavaScript</option>
+            <option>TypeScript</option>
+        </select>
+
+        <button onclick="generate()">Generate Script</button>
+
+        <h3>Generated Project</h3>
+
+        <pre id="output"></pre>
+
+    </div>
+
+    <script>
+
+        function generate() {
+
+            let url = document.getElementById("url").value
+            let steps = document.getElementById("steps").value
+            let tool = document.getElementById("tool").value
+            let lang = document.getElementById("lang").value
+
+            let result = ""
+
+            if (tool === "Selenium" && lang === "Java") {
+
+                result = `
+Project Structure
+-----------------
+
+project
+ ┣ src/test/java/tests/LoginTest.java
+ ┣ pom.xml
+ ┗ README.md
+
+
+File: LoginTest.java
+--------------------
+
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.testng.annotations.Test;
+
+public class LoginTest {
+
+@Test
+public void testScenario(){
+
+WebDriver driver = new ChromeDriver();
+
+driver.get("${url}");
+
+System.out.println("Test Steps:");
+System.out.println("${steps}");
+
+driver.quit();
+
+}
+
+}
+
+
+File: pom.xml
+--------------
+
+<project>
+<dependencies>
+
+<dependency>
+<groupId>org.seleniumhq.selenium</groupId>
+<artifactId>selenium-java</artifactId>
+<version>4.18.1</version>
+</dependency>
+
+<dependency>
+<groupId>org.testng</groupId>
+<artifactId>testng</artifactId>
+<version>7.9.0</version>
+</dependency>
+
+</dependencies>
+</project>
+
+`
+
+            }
+
+            if (tool === "Playwright" && lang === "JavaScript") {
+
+                result = `
+Project Structure
+-----------------
+
+project
+ ┣ tests/test.spec.js
+ ┣ package.json
+ ┗ playwright.config.js
+
+
+File: test.spec.js
+------------------
+
+const { test, expect } = require('@playwright/test');
+
+test('Test Scenario', async ({ page }) => {
+
+await page.goto("${url}");
+
+console.log("Steps: ${steps}")
+
+});
+
+
+File: package.json
+------------------
+
+{
+"name":"playwright-test",
+"devDependencies":{
+"@playwright/test":"latest"
+}
+}
+
+`
+
+            }
+
+            document.getElementById("output").textContent = result
+
+        }
+
+    </script>
+
+</body>
+
+</html>
