@@ -30,8 +30,8 @@ function generateSeleniumTestNGFramework(projectName = "selenium-testng-framewor
     <version>1.0-SNAPSHOT</version>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
     </properties>
     <dependencies>
         <!-- Selenium -->
@@ -383,7 +383,7 @@ ${projectName}
 \`\`\`
 
 ## Prerequisites
-- Java JDK 11 or higher
+- Java JDK 21 or higher
 - Maven 3.6+
 - Chrome/Firefox/Edge browser (for test execution)
 

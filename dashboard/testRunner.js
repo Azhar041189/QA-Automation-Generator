@@ -1,29 +1,77 @@
-const { exec } = require("child_process")
+const { spawn } = require("child_process")
 const path = require("path")
 
-function runTests() {
+function runTests(onData) {
     return new Promise((resolve, reject) => {
-        // Run Playwright tests
-        exec("npx playwright test", { cwd: path.join(__dirname, '..') }, (err, stdout, stderr) => {
-            if (err) {
-                // If there's an error but we still have stdout, resolve with the output
-                if (stdout) {
-                    resolve({
-                        success: false,
-                        output: stdout,
-                        error: stderr
-                    });
-                } else {
-                    reject(new Error(`Test execution failed: ${stderr}`));
-                }
+        // Run Playwright tests using spawn for real-time output
+        const child = spawn("npx", ["playwright", "test"], { 
+            cwd: path.join(__dirname, '..'),
+            shell: true 
+        });
+
+        let output = "";
+        let errorOutput = "";
+
+        child.stdout.on("data", (data) => {
+            const chunk = data.toString();
+            output += chunk;
+            if (onData) onData(chunk);
+        });
+
+        child.stderr.on("data", (data) => {
+            const chunk = data.toString();
+            errorOutput += chunk;
+            if (onData) onData(chunk, true);
+        });
+
+        child.on("close", (code) => {
+            if (code === 0) {
+                resolve({ success: true, output });
             } else {
-                resolve({
-                    success: true,
-                    output: stdout
+                resolve({ 
+                    success: false, 
+                    output, 
+                    error: errorOutput || `Process exited with code ${code}` 
                 });
+            }
+        });
+
+        child.on("error", (err) => {
+            reject(new Error(`Failed to start test process: ${err.message}`));
+        });
+    });
+}
+
+function runSingleTest(testName, onData) {
+    return new Promise((resolve, reject) => {
+        const child = spawn("npx", ["playwright", "test", testName], { 
+            cwd: path.join(__dirname, '..'),
+            shell: true 
+        });
+
+        let output = "";
+        let errorOutput = "";
+
+        child.stdout.on("data", (data) => {
+            const chunk = data.toString();
+            output += chunk;
+            if (onData) onData(chunk);
+        });
+
+        child.stderr.on("data", (data) => {
+            const chunk = data.toString();
+            errorOutput += chunk;
+            if (onData) onData(chunk, true);
+        });
+
+        child.on("close", (code) => {
+            if (code === 0) {
+                resolve({ success: true, output });
+            } else {
+                resolve({ success: false, output, error: errorOutput });
             }
         });
     });
 }
 
-module.exports = { runTests };
+module.exports = { runTests, runSingleTest };

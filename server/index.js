@@ -27,7 +27,7 @@ app.post("/generate", async (req, res) => {
         }
 
         const dom = await scan(url)
-        const codeSteps = steps.map(step => convertStep(step))
+        const codeSteps = await Promise.all(steps.map(step => convertStep(step)))
         const project = buildProject(tool, url, codeSteps, dom)
 
         res.json(project)

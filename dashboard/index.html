@@ -3,24 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QA Automation Dashboard</title>
+    <title>QA Forge Academy | Master Automation</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="academyContent.js"></script>
     <style>
         :root {
-            --bg-darker: #080c14;
+            --bg-darker: #020617;
             --bg-dark: #0f172a;
-            --bg-card: #1e293b;
-            --border: #334155;
+            --bg-card: rgba(30, 41, 59, 0.4);
+            --border: rgba(255, 255, 255, 0.08);
             --primary: #3b82f6;
-            --primary-hover: #2563eb;
-            --success: #22c55e;
+            --primary-glow: rgba(59, 130, 246, 0.4);
+            --secondary: #818cf8;
+            --success: #10b981;
             --warning: #f59e0b;
             --danger: #ef4444;
-            --text-main: #f1f5f9;
+            --text-main: #f8fafc;
             --text-secondary: #94a3b8;
-            --accent-glow: rgba(59, 130, 246, 0.4);
-            --radius: 12px;
+            --radius: 20px;
+            --glass: rgba(15, 23, 42, 0.6);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -28,46 +31,47 @@
         body {
             font-family: 'Outfit', sans-serif;
             background-color: var(--bg-darker);
+            background-image: 
+                radial-gradient(circle at 0% 0%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 100% 100%, rgba(129, 140, 248, 0.1) 0%, transparent 50%);
             color: var(--text-main);
             min-height: 100vh;
             overflow-x: hidden;
+            letter-spacing: -0.01em;
         }
 
-        /* Glassmorphism Sidebar */
+        /* Premium Sidebar */
         .sidebar {
             position: fixed;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: 260px;
-            background: rgba(15, 23, 42, 0.8);
-            backdrop-filter: blur(10px);
+            left: 0; top: 0; bottom: 0;
+            width: 280px;
+            background: var(--glass);
+            backdrop-filter: blur(20px);
             border-right: 1px solid var(--border);
-            padding: 30px 20px;
+            padding: 40px 24px;
             z-index: 100;
         }
 
         .logo {
             display: flex;
             align-items: center;
-            gap: 12px;
-            margin-bottom: 40px;
+            gap: 16px;
+            margin-bottom: 48px;
         }
 
         .logo-icon {
-            width: 32px;
-            height: 32px;
-            background: linear-gradient(135deg, var(--primary), #818cf8);
-            border-radius: 8px;
-            display: grid;
-            place-items: center;
+            width: 40px; height: 40px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 12px;
+            display: grid; place-items: center;
+            font-size: 1.25rem;
+            box-shadow: 0 8px 16px -4px var(--primary-glow);
         }
 
         .logo h1 {
-            font-size: 1.25rem;
-            font-weight: 700;
-            letter-spacing: -0.5px;
-            background: linear-gradient(to right, #fff, #94a3b8);
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: linear-gradient(to right, #60a5fa, #a78bfa);
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -76,31 +80,33 @@
         .nav-item {
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 12px 16px;
+            gap: 14px;
+            padding: 14px 18px;
             color: var(--text-secondary);
             text-decoration: none;
-            border-radius: 8px;
-            margin-bottom: 4px;
-            transition: all 0.2s;
+            border-radius: 12px;
+            margin-bottom: 8px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             font-weight: 500;
         }
 
         .nav-item:hover {
             color: white;
             background: rgba(255, 255, 255, 0.05);
+            transform: translateX(4px);
         }
 
         .nav-item.active {
             color: white;
-            background: var(--primary);
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+            background: rgba(59, 130, 246, 0.15);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            box-shadow: 0 4px 20px -5px var(--primary-glow);
         }
 
-        /* Main Content */
+        /* Glass Content Panels */
         .main-content {
-            margin-left: 260px;
-            padding: 40px;
+            margin-left: 280px;
+            padding: 60px;
         }
 
         header {
@@ -128,15 +134,49 @@
             margin-bottom: 40px;
         }
 
+        .panel {
+            background: var(--bg-card);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 32px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.3);
+        }
+
+        .panel:hover {
+            border-color: rgba(59, 130, 246, 0.3);
+            transform: translateY(-4px);
+        }
+
+        .panel h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 24px;
+            background: linear-gradient(to right, #fff, #cbd5e1);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Modern Stats */
         .stat-card {
             background: var(--bg-card);
             border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 24px;
-            transition: transform 0.2s;
+            border-radius: 24px;
+            padding: 28px;
+            position: relative;
+            overflow: hidden;
         }
 
-        .stat-card:hover { transform: translateY(-4px); }
+        .stat-card::after {
+            content: "";
+            position: absolute;
+            top: -50%; right: -50%;
+            width: 100%; height: 100%;
+            background: radial-gradient(circle, var(--primary-glow), transparent 70%);
+            opacity: 0.1;
+        }
 
         .stat-label {
             color: var(--text-secondary);
@@ -146,8 +186,9 @@
         }
 
         .stat-value {
-            font-size: 1.5rem;
-            font-weight: 700;
+            font-size: 2rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
         }
 
         .grid-container {
@@ -156,33 +197,7 @@
             gap: 30px;
         }
 
-        .panel {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 30px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .panel::before {
-            content: "";
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 4px;
-            background: linear-gradient(to right, var(--primary), transparent);
-        }
-
-        .panel h3 {
-            font-size: 1.125rem;
-            font-weight: 600;
-            margin-bottom: 24px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        /* Form Elements */
+        /* Premium Inputs */
         .input-group { margin-bottom: 20px; }
 
         label {
@@ -336,173 +351,135 @@
             <h1>QA Forge</h1>
         </div>
         <nav>
-            <a href="#" class="nav-item active">Dashboard</a>
-            <a href="#" class="nav-item">Test Suite</a>
-            <a href="#" class="nav-item">Reports</a>
-            <a href="#" class="nav-item">Integrations</a>
-            <a href="#" class="nav-item">Settings</a>
+            <a href="#" class="nav-item active"><i class="fas fa-graduation-cap"></i> Academy Hub</a>
+            <a href="#" class="nav-item"><i class="fas fa-flask"></i> Practice Lab</a>
+            <a href="#" class="nav-item"><i class="fas fa-robot"></i> AI Mentor</a>
+            <a href="#" class="nav-item"><i class="fas fa-history"></i> My Sessions</a>
+            <a href="#" class="nav-item"><i class="fas fa-cog"></i> Settings</a>
         </nav>
     </div>
 
     <div class="main-content">
         <header>
             <div class="header-title">
-                <h2>Automation Control Panel</h2>
-                <p>Manage your test lifecycle from generation to execution</p>
+                <h2>Welcome to QA Academy</h2>
+                <p>Master automation from zero to expert in recorded time.</p>
             </div>
             <div class="header-actions">
                 <span id="server-status" class="tag tag-blue">● Backend Connected</span>
             </div>
         </header>
 
-        <div id="view-dashboard" class="view-section active">
+        <!-- Academy Hub View -->
+        <div id="view-academy-hub" class="view-section active">
             <div class="stats-grid">
                 <div class="stat-card">
-                    <div class="stat-label">Total Tests</div>
-                    <div class="stat-value" id="stat-tests">0</div>
+                    <div class="stat-label">Course Progress</div>
+                    <div class="stat-value" id="stat-progress">15%</div>
+                    <div style="height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; margin-top: 12px;">
+                        <div style="width: 15%; height: 100%; background: var(--success); border-radius: 2px; box-shadow: 0 0 10px var(--success);"></div>
+                    </div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-label">Pass Rate</div>
-                    <div class="stat-value" style="color: var(--success);" id="stat-passrate">100%</div>
+                    <div class="stat-label">Challenges Won</div>
+                    <div class="stat-value" id="stat-challenges">2 / 12</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-label">Pages Crawled</div>
-                    <div class="stat-value" id="stat-pages">0</div>
+                    <div class="stat-label">Mastery Rank</div>
+                    <div class="stat-value" id="stat-rank" style="color: var(--secondary); font-size: 1.25rem;">Beginner Apprentice</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-label">Last Run</div>
-                    <div class="stat-value" id="stat-lastrun">Never</div>
+                    <div class="stat-label">Study Streak</div>
+                    <div class="stat-value" id="stat-streak">🔥 3 Days</div>
                 </div>
             </div>
 
-            <div class="grid-container">
-                <!-- Test Generation -->
-                <div class="panel">
-                    <h3>🛠️ Test Generation</h3>
-                    
-                    <div class="input-group">
-                        <label>Target URL</label>
-                        <input type="text" id="gen-url" placeholder="https://example.com/login">
-                    </div>
-
-                    <div class="input-group">
-                        <label>Test Path / Steps (One per line)</label>
-                        <textarea id="gen-steps" rows="4" placeholder="Open login page&#10;Type user in username&#10;Type pass in password&#10;Click login"></textarea>
-                    </div>
-
-                    <div class="row-group">
-                        <div class="input-group">
-                            <label>Tool</label>
-                            <select id="gen-tool">
-                                <option value="playwright">Playwright</option>
-                                <option value="selenium">Selenium</option>
-                            </select>
+            <h3 style="margin-bottom: 24px;">🗺️ Your Learning Path</h3>
+            <div class="grid-container" id="academy-learning-path">
+                <div class="panel" style="border-left: 4px solid var(--success);">
+                    <h4>Module 1: Web Automation Basics</h4>
+                    <p style="font-size: 0.8125rem; color: var(--text-secondary); margin: 10px 0 20px;">Master buttons, inputs, and basic navigation.</p>
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        <div style="display: flex; justify-content: space-between; font-size: 0.8125rem; padding: 10px; background: rgba(16, 185, 129, 0.1); border-radius: 8px;">
+                            <span>My First Click</span>
+                            <span style="color: var(--success);">✓ Completed</span>
                         </div>
-                        <div class="input-group">
-                            <label>Language</label>
-                            <select id="gen-lang">
-                                <option value="typescript">TypeScript</option>
-                                <option value="javascript">JavaScript</option>
-                                <option value="java">Java</option>
-                                <option value="python">Python</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div id="enterprise-options" style="display: none; margin-bottom: 20px; padding: 15px; background: rgba(59, 130, 246, 0.05); border: 1px dashed var(--primary); border-radius: 8px;">
-                        <h4 style="margin-bottom: 10px; font-size: 0.875rem; color: var(--primary);">🚀 Enterprise Upgrades</h4>
-                        <div style="display: flex; flex-direction: column; gap: 8px;">
-                            <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 0.8125rem;">
-                                <input type="checkbox" id="gen-headless" style="width: 16px; height: 16px;">
-                                Headless Browser Execution
-                            </label>
-                            <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 0.8125rem;">
-                                <input type="checkbox" id="gen-excel" style="width: 16px; height: 16px;">
-                                Excel Data-Driven Integration
-                            </label>
-                        </div>
-                    </div>
-
-                    <button id="btn-generate" class="btn btn-primary" onclick="generateTest()">
-                        Generate Test Case
-                    </button>
-                    <div class="row-group">
-                        <button id="btn-crawl" class="btn btn-outline" onclick="crawlSite()">
-                            Discovery Crawl URL
-                        </button>
-                        <button id="btn-upload-manual" class="btn btn-outline" onclick="triggerManualUpload()">
-                            Convert Manual Doc
-                        </button>
-                    </div>
-                    <!-- Hidden file input -->
-                    <input type="file" id="manual-doc-upload" style="display: none;" accept=".txt,.csv,.xlsx">
-                </div>
-
-                <!-- Execution & Reports -->
-                <div class="panel">
-                    <h3>🚀 Execution & Reporting</h3>
-                    
-                    <div style="margin-bottom: 24px;">
-                        <label>Test Context</label>
-                        <p style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 12px;">Run your automation suite locally or triggered on remote agents. Ensure project files are generated first.</p>
-                    </div>
-
-                    <button id="btn-run" class="btn btn-success" onclick="runTests()">
-                        Run Automation Suite
-                    </button>
-                    
-                    <button id="btn-report" class="btn btn-warning" onclick="openReport()">
-                        Launch Test Report
-                    </button>
-
-                    <div style="margin-top: 30px;">
-                        <h3>🔗 CI/CD Pipelines</h3>
-                        <div class="row-group">
-                            <button class="btn btn-outline" onclick="triggerCI('GitHub Actions')">GitHub Actions</button>
-                            <button class="btn btn-outline" onclick="triggerCI('Jenkins')">Jenkins CI</button>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.8125rem; padding: 10px; background: rgba(59, 130, 246, 0.1); border-radius: 8px; cursor: pointer;" onclick="startChallenge('L1-002')">
+                            <span>Input Mastery</span>
+                            <span style="color: var(--primary);">Start →</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- Console / Output -->
-                <div class="console-panel" style="grid-column: 1 / -1;">
-                    <div class="console-header">
-                        <span style="font-weight: 600; font-size: 0.8125rem; color: var(--text-secondary);">SYSTEM OUTPUT</span>
-                        <button class="btn btn-outline" style="width: auto; padding: 4px 10px; font-size: 0.75rem; margin-bottom: 0;" onclick="clearConsole()">Clear Logs</button>
+                <div class="panel" style="opacity: 0.6; cursor: not-allowed;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <h4>Module 2: Advanced Locators</h4>
+                        <i class="fas fa-lock" style="font-size: 0.875rem;"></i>
                     </div>
-                    <div id="console" class="console-body">
-                        <div class="log-entry">
-                            <span class="log-time">[${new Date().toLocaleTimeString('en-GB', { hour12: false })}]</span>
-                            <span class="log-type info">INFO</span>
-                            <span>QA Forge Dashboard initialized. Ready for operations.</span>
-                        </div>
-                    </div>
+                    <p style="font-size: 0.8125rem; color: var(--text-secondary); margin: 10px 0 20px;">CSS Selectors, XPaths, and dynamic IDs.</p>
+                    <button class="btn btn-outline" disabled style="width: 100%; font-size: 0.75rem;">Unlock at 20% Progress</button>
                 </div>
             </div>
         </div>
 
-        <!-- Test Suite View -->
-        <div id="view-test-suite" class="view-section" style="display: none;">
-            <div class="panel" style="min-height: 400px;">
-                <h3>📁 Generated Test Suite</h3>
-                <p style="color: var(--text-secondary); margin-bottom: 20px;">Manage and execute individual test cases generated by QA Forge.</p>
-                
-                <div style="background: var(--bg-dark); border: 1px solid var(--border); border-radius: 8px; overflow: hidden;">
-                    <div style="display: grid; grid-template-columns: 2fr 1fr 1fr auto; padding: 12px 20px; border-bottom: 1px solid var(--border); font-weight: 600; font-size: 0.875rem; color: var(--text-secondary);">
-                        <div>Test Name</div>
-                        <div>Target</div>
-                        <div>Status</div>
-                        <div>Actions</div>
+        <!-- Practice Lab View (Interactive Side-by-Side) -->
+        <div id="view-practice-lab" class="view-section" style="display: none;">
+            <div style="display: grid; grid-template-columns: 1fr 1.2fr; gap: 24px; height: calc(100vh - 250px);">
+                <!-- Left Side: Manual Playground -->
+                <div class="panel" style="display: flex; flex-direction: column;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h3>🔬 Interactive Lab</h3>
+                        <div style="display: flex; gap: 8px;">
+                            <select id="lab-tool" style="padding: 4px 8px; border-radius: 6px; background: var(--bg-dark); color: white; border: 1px solid var(--border); font-size: 0.75rem;" onchange="updateLabCode()">
+                                <option value="playwright">Playwright</option>
+                                <option value="selenium">Selenium</option>
+                            </select>
+                            <select id="lab-lang" style="padding: 4px 8px; border-radius: 6px; background: var(--bg-dark); color: white; border: 1px solid var(--border); font-size: 0.75rem;" onchange="updateLabCode()">
+                                <option value="javascript">JavaScript</option>
+                                <option value="java">Java</option>
+                            </select>
+                            <button class="btn btn-primary" id="btn-lab-update" onclick="updateLabCode()" style="padding: 4px 12px; font-size: 0.75rem; width: auto; min-width: 80px; margin-bottom: 0;">
+                                <i class="fas fa-sync-alt"></i> Update
+                            </button>
+                        </div>
                     </div>
-                    <div id="test-list-container">
-                        <!-- Tests populated by JS -->
+
+                    <div style="flex: 1; display: flex; flex-direction: column; gap: 16px;">
+                        <div class="input-group">
+                            <label>Context URL</label>
+                            <input type="text" id="lab-url" value="https://practice-automation.com/login" style="background: rgba(0,0,0,0.2);">
+                        </div>
+                        <div class="input-group" style="flex: 1; display: flex; flex-direction: column;">
+                            <label>Type your manual steps (one per line)</label>
+                            <textarea id="lab-steps" style="flex: 1; background: rgba(0,0,0,0.2); font-family: 'Courier New', Courier, monospace; font-size: 0.875rem;" placeholder="Open login page&#10;Type 'student' in username&#10;Click Submit" oninput="debounceGenerate()"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Side: Live AI Code Terminal -->
+                <div class="panel" style="background: #010409; border-color: #30363d; display: flex; flex-direction: column;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                        <h3 style="margin: 0; color: #7d8590; font-size: 0.875rem;">AI CODE EXPLAINER</h3>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span style="font-size: 0.75rem; color: var(--success);" id="lab-status">● Live Training Active</span>
+                            <button class="btn btn-outline" style="width: auto; padding: 4px 10px; font-size: 0.75rem; border-color: #30363d;" onclick="copyLabCode()">Copy Code</button>
+                        </div>
+                    </div>
+                    
+                    <div id="lab-code-display" style="flex: 1; overflow-y: auto; padding: 20px; font-family: 'Fira Code', monospace; font-size: 0.875rem; color: #e6edf3; line-height: 1.6; white-space: pre-wrap;">
+<span style="color: #8b949e;">// Start typing steps on the left to see the AI generate explained code here...</span>
+                    </div>
+
+                    <div style="margin-top: 16px; padding: 12px; background: rgba(59, 130, 246, 0.05); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 8px;">
+                        <h4 style="font-size: 0.75rem; color: var(--primary); margin-bottom: 4px;">🎓 Mentor Tip</h4>
+                        <p id="mentor-tip" style="font-size: 0.75rem; color: var(--text-secondary);">Always look for IDs or unique Data Attributes as your first locator strategy.</p>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Reports View -->
-        <div id="view-reports" class="view-section" style="display: none;">
+        <div id="view-my-sessions" class="view-section" style="display: none;">
             <div class="grid-container">
                 <div class="panel">
                     <h3>📊 Execution History</h3>
@@ -587,6 +564,24 @@
                     </div>
                 </div>
 
+                <div style="margin-top: 30px; border-top: 1px solid var(--border); padding-top: 24px;">
+                    <h4 style="margin-bottom: 16px; color: white; display: flex; align-items: center; gap: 8px;">
+                        <span>🧠 AI Engine Configuration</span>
+                    </h4>
+                    <div class="input-group">
+                        <label>Preferred Ollama Model</label>
+                        <select id="setting-ai-model">
+                            <option value="gemma4:e2b" selected>Gemma 4 (E2B) - High Performance</option>
+                            <option value="qwen2.5-coder:7b">Qwen 2.5 Coder (7B) - Optimized</option>
+                            <option value="gemma3:1b">Gemma 3 (1B) - Lightweight</option>
+                            <option value="llama3:8b">Llama 3 (8B) - General</option>
+                        </select>
+                        <p style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 6px;">
+                            Ensure the model is pulled locally via <code>ollama pull [model-name]</code>.
+                        </p>
+                    </div>
+                </div>
+
                 <div class="input-group" style="margin-top: 20px;">
                     <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
                         <input type="checkbox" checked style="width: 18px; height: 18px;">
@@ -604,9 +599,52 @@
                 <button class="btn btn-primary" style="margin-top: 20px;" onclick="saveSettings()">Save Preferences</button>
             </div>
         </div>
+
+        <!-- AI Assistant View -->
+        <div id="view-ai-mentor" class="view-section" style="display: none;">
+            <div class="panel" style="max-width: 900px; height: 750px; display: flex; flex-direction: column;">
+                <div style="margin-bottom: 24px;">
+                    <h3>🤖 AI QA Assistant</h3>
+                    <p style="color: var(--text-secondary);">Ask any questions about test generation, framework patterns, or QA advice.</p>
+                </div>
+
+                <div id="chat-window" style="flex: 1; overflow-y: auto; padding: 20px; background: rgba(0,0,0,0.2); border-radius: 12px; margin-bottom: 20px; display: flex; flex-direction: column; gap: 16px; border: 1px solid var(--border);">
+                    <div class="ai-msg" style="align-self: flex-start; max-width: 80%; background: rgba(255,255,255,0.05); padding: 14px 18px; border-radius: 2px 16px 16px 16px; border-left: 3px solid var(--primary); font-size: 0.9375rem;">
+                        Hello! I'm your AI QA Assistant. How can I help you modernize your automation suite today?
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 12px;">
+                    <textarea id="chat-input" placeholder="e.g., Generate a login test case for Playwright..." style="flex: 1; height: 60px; padding: 14px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg-dark); color: white; resize: none;"></textarea>
+                    <button class="btn btn-primary" id="btn-chat-send" onclick="sendChat()" style="width: 100px; height: 60px;">Send</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Global Console -->
+        <div class="console-panel" style="margin-top: 40px; margin-bottom: 40px;">
+            <div class="console-header">
+                <span style="font-weight: 600; font-size: 0.8125rem; color: var(--text-secondary);">SYSTEM LOGS</span>
+                <button class="btn btn-outline" style="width: auto; padding: 4px 10px; font-size: 0.75rem; margin-bottom: 0;" onclick="clearConsole()">Clear Logs</button>
+            </div>
+            <div id="console" class="console-body" style="max-height: 200px;">
+                <!-- Logs here -->
+            </div>
+        </div>
     </div>
 
     <script>
+        // SSE Setup for Live Logs
+        const eventSource = new EventSource('/events');
+        eventSource.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+            if (data.type === 'log') {
+                log(data.message);
+            } else if (data.type === 'status') {
+                log(`[Status] ${data.message}`, 'info');
+            }
+        };
+
         // Settings Load & Save
         function loadSettings() {
             try {
@@ -619,6 +657,7 @@
                     // Sync main generator selects to settings
                     if (s.tool) document.getElementById("gen-tool").value = s.tool;
                     if (s.lang) document.getElementById("gen-lang").value = s.lang;
+                    if (s.aiModel) document.getElementById("setting-ai-model").value = s.aiModel;
                 }
             } catch (e) {}
         }
@@ -626,7 +665,8 @@
             const outDir = document.getElementById("setting-outdir").value;
             const tool = document.getElementById("setting-tool").value;
             const lang = document.getElementById("setting-lang").value;
-            localStorage.setItem('qa-settings', JSON.stringify({ outDir, tool, lang }));
+            const aiModel = document.getElementById("setting-ai-model").value;
+            localStorage.setItem('qa-settings', JSON.stringify({ outDir, tool, lang, aiModel }));
             log('Settings saved locally.', 'success');
         }
 
@@ -717,12 +757,12 @@
                 navItems.forEach(nav => nav.classList.remove('active'));
                 item.classList.add('active');
 
-                // Determine target view from text content
-                const viewName = item.textContent.trim().toLowerCase().replace(' ', '-');
+                // Determine target view from text content (stripping fontawesome text)
+                const viewName = item.innerText.trim().toLowerCase().replace(/\s+/g, '-');
                 
-                // Load dynamic data based on tab clicked
-                if (viewName === 'test-suite') loadTests();
-                if (viewName === 'reports') loadHistory();
+                // Load dynamic data based on tab
+                if (viewName === 'practice-lab') log("Switched to Interactive Lab", "info");
+                if (viewName === 'my-sessions') loadHistory();
                 
                 // Hide all sections and show target
                 viewSections.forEach(section => {
@@ -809,7 +849,11 @@
                         testCases: stepsArray.length > 0 ? stepsArray : ["Open " + url, "Verify page"], 
                         tool, 
                         language,
-                        options: { headless, useExcel }
+                        options: { 
+                            headless, 
+                            useExcel,
+                            aiModel: JSON.parse(localStorage.getItem('qa-settings'))?.aiModel
+                        }
                     })
                 });
                 const result = await response.json();
@@ -962,6 +1006,137 @@
             log("Please select a .txt or .csv file with your test steps.", "info");
             triggerManualUpload();
         }
+
+        // Academy & Lab Logic
+        let labDebounceTimer;
+        function debounceGenerate() {
+            clearTimeout(labDebounceTimer);
+            labDebounceTimer = setTimeout(updateLabCode, 1500);
+        }
+
+        async function updateLabCode() {
+            const steps = document.getElementById('lab-steps').value.trim();
+            const tool = document.getElementById('lab-tool').value;
+            const lang = document.getElementById('lab-lang').value;
+            const output = document.getElementById('lab-code-display');
+            const status = document.getElementById('lab-status');
+
+            if (!steps) return;
+
+            status.textContent = "● AI Thinking...";
+            status.style.color = "var(--warning)";
+
+            try {
+                const aiModel = JSON.parse(localStorage.getItem('qa-settings'))?.aiModel || 'gemma3:1b';
+                const res = await fetch(`${API_URL}/ai/educational-generate`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: steps, tool, language: lang, model: aiModel })
+                });
+                const result = await res.json();
+
+                if (result.success) {
+                    // Highlight "STUDY:" comments
+                    const highlighted = result.code.replace(/(\/\/ STUDY:.*)/g, '<span style="color: #aff5b4; font-weight: 500;">$1</span>');
+                    output.innerHTML = highlighted;
+                    status.textContent = "● AI Explained";
+                    status.style.color = "var(--success)";
+                }
+            } catch (err) {
+                status.textContent = "● Error";
+                status.style.color = "var(--danger)";
+                log("Lab Error: " + err.message, "error");
+            }
+        }
+
+        function startChallenge(id) {
+            const challenge = academyChallenges.find(c => c.id === id);
+            if (!challenge) return;
+
+            // Switch to Practice Lab view
+            navItems.forEach(n => n.classList.remove('active'));
+            const labNav = Array.from(navItems).find(n => n.innerText.includes('Practice Lab'));
+            if (labNav) labNav.classList.add('active');
+
+            viewSections.forEach(s => s.style.display = 'none');
+            document.getElementById('view-practice-lab').style.display = 'block';
+
+            // Fill data
+            document.getElementById('lab-steps').value = challenge.steps.join('\n');
+            document.getElementById('mentor-tip').innerText = challenge.hint;
+            
+            log(`Loading challenge: ${challenge.title}...`, "success");
+            updateLabCode();
+        }
+
+        function copyLabCode() {
+            const code = document.getElementById('lab-code-display').innerText;
+            navigator.clipboard.writeText(code);
+            log("Code copied to clipboard!", "success");
+        }
+
+        // AI Assistant Chat Logic
+        let chatHistory = [];
+        async function sendChat() {
+            const input = document.getElementById('chat-input');
+            const chatWindow = document.getElementById('chat-window');
+            const prompt = input.value.trim();
+            
+            if (!prompt) return;
+
+            // User Message
+            const userMsg = document.createElement('div');
+            userMsg.style = "align-self: flex-end; max-width: 80%; background: var(--primary); padding: 12px 18px; border-radius: 16px 16px 2px 16px; font-size: 0.9375rem; color: white;";
+            userMsg.textContent = prompt;
+            chatWindow.appendChild(userMsg);
+            
+            input.value = '';
+            chatHistory.push({ role: 'user', content: prompt });
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+
+            setBtnLoading('btn-chat-send', true);
+
+            try {
+                const aiModel = JSON.parse(localStorage.getItem('qa-settings'))?.aiModel || 'qwen2.5-coder:7b';
+                const res = await fetch(`${API_URL}/ai/chat`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ messages: chatHistory, model: aiModel })
+                });
+                const result = await res.json();
+                
+                if (result.success) {
+                    const aiMsg = document.createElement('div');
+                    aiMsg.style = "align-self: flex-start; max-width: 80%; background: rgba(255,255,255,0.05); padding: 14px 18px; border-radius: 2px 16px 16px 16px; border-left: 3px solid var(--primary); font-size: 0.9375rem; white-space: pre-wrap;";
+                    aiMsg.textContent = result.response;
+                    chatWindow.appendChild(aiMsg);
+                    chatHistory.push({ role: 'assistant', content: result.response });
+                } else {
+                    const errMsg = document.createElement('div');
+                    errMsg.style = "align-self: center; background: rgba(239, 68, 68, 0.1); color: #f87171; padding: 10px 20px; border-radius: 8px; border: 1px solid var(--danger); font-size: 0.8125rem; margin: 10px 0;";
+                    errMsg.textContent = `Error: ${result.error || "Server failed to respond. Please restart the backend."}`;
+                    chatWindow.appendChild(errMsg);
+                    log(`AI Assistant Error: ${result.error}`, 'error');
+                }
+            } catch (e) {
+                const errMsg = document.createElement('div');
+                errMsg.style = "align-self: center; background: rgba(239, 68, 68, 0.1); color: #f87171; padding: 10px 20px; border-radius: 8px; border: 1px solid var(--danger); font-size: 0.8125rem; margin: 10px 0;";
+                errMsg.textContent = "Connectivity Error: Backend unreachable. Ensure 'npm run dashboard' is running.";
+                chatWindow.appendChild(errMsg);
+                log(`Failed to connect to AI Assistant: ${e.message}`, 'error');
+            } finally {
+                setBtnLoading('btn-chat-send', false);
+                chatWindow.scrollTop = chatWindow.scrollHeight;
+            }
+        }
+
+        // Add Enter key listener for chat
+        document.getElementById('chat-input').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendChat();
+            }
+        });
     </script>
 </body>
 </html>

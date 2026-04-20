@@ -4,6 +4,7 @@
     "description": "Generate automation tests from manual test cases",
     "version": "0.0.1",
     "publisher": "qa-extension",
+    "license": "MIT",
     "engines": {
         "vscode": "^1.75.0"
     },

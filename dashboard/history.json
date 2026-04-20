@@ -1,5 +1,33 @@
 [
   {
+    "type": "suite",
+    "name": "Full Test Suite",
+    "status": "Passed",
+    "id": 15,
+    "timestamp": "2026-04-20T13:03:57.818Z"
+  },
+  {
+    "type": "suite",
+    "name": "Full Test Suite",
+    "status": "Passed",
+    "id": 14,
+    "timestamp": "2026-04-20T12:51:16.352Z"
+  },
+  {
+    "type": "suite",
+    "name": "Full Test Suite",
+    "status": "Passed",
+    "id": 13,
+    "timestamp": "2026-04-20T12:12:58.459Z"
+  },
+  {
+    "type": "suite",
+    "name": "Full Test Suite",
+    "status": "Passed",
+    "id": 12,
+    "timestamp": "2026-04-20T12:06:21.171Z"
+  },
+  {
     "type": "single",
     "name": "smoke.spec.ts",
     "status": "Passed",
